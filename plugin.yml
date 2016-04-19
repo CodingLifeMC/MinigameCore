@@ -1,0 +1,5 @@
+main: us.fihgu.minigamecore.Loader
+name: MinigameCore
+version: 1.0
+author: fihgu
+description: Core plugin that other minigame uses.
