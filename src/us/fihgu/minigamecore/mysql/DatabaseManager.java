@@ -5,17 +5,22 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
+import java.util.ArrayList;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import us.fihgu.minigamecore.Loader;
+import us.fihgu.minigamecore.bungeecord.NetworkManager;
 import us.fihgu.minigamecore.game.Minigame;
 import us.fihgu.minigamecore.matchmaking.MinigamePlayer;
 
 public class DatabaseManager
 {
 	private static Connection connection;
-	public static final String DATABASE_NAME = "minigamecore";
+	
+	public static final String DATABASE = "minigamecore";
+	public static final String PLAYERS_TABLE = "players";
+	public static final String LOBBIES_TABLE = "lobbies";
+	
 	
 	private static void connect() throws SQLException
 	{
@@ -49,15 +54,16 @@ public class DatabaseManager
 		{
 			try
 			{
-				statement.execute("DROP DATABASE " + DATABASE_NAME);
+				statement.execute("DROP DATABASE " + DATABASE);
 			}
 			catch(SQLException e1)
 			{
 				//fail silently
 			}
 			
-			statement.execute("CREATE DATABASE " + DATABASE_NAME);
-			statement.execute("CREATE TABLE " + DATABASE_NAME + ".players(uuid VARCHAR(36) PRIMARY KEY, username VARCHAR(50), lobby VARCHAR(50) DEFAULT \"offline\", money INT DEFAULT 0)");
+			statement.execute("CREATE DATABASE " + DATABASE);
+			statement.execute("CREATE TABLE " + DATABASE + "." + PLAYERS_TABLE + "(uuid VARCHAR(36) PRIMARY KEY, username VARCHAR(50), lobby VARCHAR(50) DEFAULT \"offline\", money INT DEFAULT 0)");
+			statement.execute("CREATE TABLE " + DATABASE + "." + LOBBIES_TABLE + "(id INT AUTO_INCREMENT PRIMARY KEY, minigame VARCHAR(64), playercount INT DEFAULT 0, server VARCHAR(64))");
 		}
 		catch (SQLException e)
 		{
@@ -75,7 +81,7 @@ public class DatabaseManager
 		try(Statement statement = getConnection().createStatement())
 		{
 			//SELECT score FROM minigamecore.players WHERE username="fihgu";
-			ResultSet resultSet = statement.executeQuery("SELECT " + colomnName + " FROM " + DATABASE_NAME + ".players WHERE username=\"" + player.getUUID().toString() + "\"");
+			ResultSet resultSet = statement.executeQuery("SELECT " + colomnName + " FROM " + DATABASE + "." + PLAYERS_TABLE + " WHERE username=\"" + player.getUUID().toString() + "\"");
 			
 			if(resultSet.next())
 			{
@@ -114,7 +120,7 @@ public class DatabaseManager
 		try(Statement statement = getConnection().createStatement())
 		{
 			//UPDATE minigamecore.players SET rp_minigame=rank WHERE username="fihgu";
-			statement.execute("UPDATE " + DATABASE_NAME + ".players SET " + colomnName + "=" + rankPoint + " WHERE uuid=\"" + player.getUUID().toString() + "\"");
+			statement.execute("UPDATE " + DATABASE + "." + PLAYERS_TABLE + " SET " + colomnName + "=" + rankPoint + " WHERE uuid=\"" + player.getUUID().toString() + "\"");
 		}
 		catch (SQLException e)
 		{
@@ -127,7 +133,7 @@ public class DatabaseManager
 		try(Statement statement = getConnection().createStatement())
 		{
 			//SELECT lobby FROM minigamecore.players WHERE username="fihgu"
-			ResultSet resultSet = statement.executeQuery("SELECT lobby FROM " + DATABASE_NAME + ".players WHERE uuid=\"" + player.getUUID().toString() + "\"");
+			ResultSet resultSet = statement.executeQuery("SELECT lobby FROM " + DATABASE + "." + PLAYERS_TABLE + " WHERE uuid=\"" + player.getUUID().toString() + "\"");
 			
 			if(resultSet.next())
 			{
@@ -148,7 +154,7 @@ public class DatabaseManager
 		try(Statement statement = getConnection().createStatement())
 		{
 			//UPDATE minigamecore.players SET score=50 WHERE username="fihgu";
-			statement.execute("UPDATE " + DATABASE_NAME + ".players SET lobby=\"" + lobby + "\" WHERE uuid=\"" + player.getUUID().toString() + "\"");
+			statement.execute("UPDATE " + DATABASE + "." + PLAYERS_TABLE + " SET lobby=\"" + lobby + "\" WHERE uuid=\"" + player.getUUID().toString() + "\"");
 		}
 		catch (SQLException e)
 		{
@@ -161,7 +167,7 @@ public class DatabaseManager
 		try(Statement statement = getConnection().createStatement())
 		{
 			//SELECT money FROM minigamecore.players WHERE username="fihgu"
-			ResultSet resultSet = statement.executeQuery("SELECT money FROM " + DATABASE_NAME + ".players WHERE uuid=\"" + player.getUUID().toString() + "\"");
+			ResultSet resultSet = statement.executeQuery("SELECT money FROM " + DATABASE + "." + PLAYERS_TABLE + " WHERE uuid=\"" + player.getUUID().toString() + "\"");
 			
 			if(resultSet.next())
 			{
@@ -182,7 +188,7 @@ public class DatabaseManager
 		try(Statement statement = getConnection().createStatement())
 		{
 			//UPDATE minigamecore.players SET money=money WHERE username="fihgu";
-			statement.execute("UPDATE " + DATABASE_NAME + ".players SET money=" + money + " WHERE uuid=\"" + player.getUUID().toString() + "\"");
+			statement.execute("UPDATE " + DATABASE + "." + PLAYERS_TABLE + " SET money=" + money + " WHERE uuid=\"" + player.getUUID().toString() + "\"");
 		}
 		catch (SQLException e)
 		{
@@ -198,7 +204,7 @@ public class DatabaseManager
 		String colomnName = "rp_" + minigame.getId();
 		try (Statement statement = getConnection().createStatement())
 		{
-			statement.execute("ALTER TABLE " + DATABASE_NAME + ".players ADD " + colomnName + " INT DEFAULT 0");
+			statement.execute("ALTER TABLE " + DATABASE + "." + PLAYERS_TABLE + " ADD " + colomnName + " INT DEFAULT 0");
 		}
 		catch (SQLException e)
 		{
@@ -213,11 +219,163 @@ public class DatabaseManager
 	{
 		try(Statement statement = getConnection().createStatement())
 		{
-			ResultSet resultSet = statement.executeQuery("SELECT uuid FROM " + DATABASE_NAME + ".players WHERE uuid=\"" + player.getUUID().toString() + "\"");
+			ResultSet resultSet = statement.executeQuery("SELECT uuid FROM " + DATABASE + "." + PLAYERS_TABLE + " WHERE uuid=\"" + player.getUUID().toString() + "\"");
 			if(!resultSet.next())
 			{
-				statement.execute("INSERT INTO " + DATABASE_NAME + ".players(uuid, username) VALUE(\"" + player.getUUID().toString() + "\", \"" + player.getName() +"\")");
+				statement.execute("INSERT INTO " + DATABASE + "." + PLAYERS_TABLE + "(uuid, username) VALUES(\"" + player.getUUID().toString() + "\", \"" + player.getName() +"\")");
 			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * register a new lobby and return the generated lobby id.
+	 */
+	public static int registerNewLobby(Minigame minigame, String server)
+	{
+		try (Statement statement = getConnection().createStatement())
+		{
+			String minigameId = "undefined";
+			if(minigame != null)
+			{
+				minigameId = minigame.getId();
+			}
+			statement.execute("INSERT INTO " + DATABASE + "." + LOBBIES_TABLE + "(minigame, server) VALUES(\"" + minigameId + "\", \"" + server +"\")");
+			ResultSet resultSet = statement.executeQuery("SELECT LAST_INSERT_ID()");
+			if(resultSet.next())
+			{
+				return resultSet.getInt(1);
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return -1;
+	}
+	
+	/**
+	 * @param lobbyId
+	 * @return null if lobby is not registered yet, or undefined when the lobby do not have a minigame set yet.
+	 */
+	public static String getMinigame(int lobbyId)
+	{
+		String minigame = null;
+		
+		try (Statement statement = getConnection().createStatement())
+		{
+			ResultSet resultSet = statement.executeQuery("SELECT minigame FROM " + DATABASE + "." + LOBBIES_TABLE + " WHERE id=" + lobbyId);
+			if(resultSet.next())
+			{
+				return resultSet.getString(1);
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return minigame;
+	}
+	
+	public static int getPlayerCount(int lobbyId)
+	{
+		int playerCount = -1;
+		
+		try (Statement statement = getConnection().createStatement())
+		{
+			ResultSet resultSet = statement.executeQuery("SELECT playercount FROM " + DATABASE + "." + LOBBIES_TABLE + " WHERE id=" + lobbyId);
+			if(resultSet.next())
+			{
+				return resultSet.getInt(1);
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return playerCount;
+	}
+	
+	public static void setPlayerCount(int lobbyId, int playerCount)
+	{
+		try(Statement statement = getConnection().createStatement())
+		{
+			statement.execute("UPDATE " + DATABASE + "." + LOBBIES_TABLE + " SET playercount=" + playerCount + " WHERE id=" + lobbyId);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public static String getServer(int lobbyId)
+	{
+		String server = null;
+		
+		try (Statement statement = getConnection().createStatement())
+		{
+			ResultSet resultSet = statement.executeQuery("SELECT server FROM " + DATABASE + "." + LOBBIES_TABLE + " WHERE id=" + lobbyId);
+			if(resultSet.next())
+			{
+				return resultSet.getString(1);
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return server;
+	}
+	
+	/**
+	 * @return the name of lobbyServer that has least registered player playing in a lobby<br>
+	 * players who isn't registered in the database does not count.
+	 */
+	public static String getEmptiestServer()
+	{
+		ArrayList<String> emptyServers = new ArrayList<String>();
+		emptyServers.addAll(NetworkManager.getLobbyServers());
+		String emptiest = null;
+		try (Statement statement = getConnection().createStatement())
+		{
+			ResultSet resultSet = statement.executeQuery("SELECT server,SUM(playercount) FROM " + DATABASE + "." + LOBBIES_TABLE + "  GROUP BY server ORDER BY sum(playercount)");
+			while(resultSet.next())
+			{
+				String serverName = resultSet.getString(1);
+				if(emptiest == null)
+				{
+					emptiest = serverName;
+				}
+				emptyServers.remove(serverName);
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		
+		if(emptyServers.size() > 0)
+		{
+			return emptyServers.get(0);
+		}
+		else
+		{
+			return emptiest;
+		}
+	}
+	
+	public static void unregisterLobby(int lobbyId)
+	{
+		try (Statement statement = getConnection().createStatement())
+		{
+			statement.execute("DELETE FROM " + DATABASE + "." + LOBBIES_TABLE + " WHERE id=" + lobbyId);
 		}
 		catch (SQLException e)
 		{

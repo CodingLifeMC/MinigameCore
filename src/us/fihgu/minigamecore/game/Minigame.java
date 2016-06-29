@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import us.fihgu.minigamecore.matchmaking.GameSession;
+import us.fihgu.minigamecore.matchmaking.Lobby;
 
 /**
  * Instead of being an instance of a single minigame, each Minigame instance describes how a type of minigame works. <br>
@@ -17,6 +18,9 @@ public abstract class Minigame
 	protected String id;
 	protected String name;
 	protected String description;
+	
+	protected int minPlayer = 3;
+	protected int maxPlayer = 12;
 	
 	public String getId()
 	{
@@ -32,4 +36,24 @@ public abstract class Minigame
 	 * @return the possible maps for this minigame.<br>
 	 */
 	public abstract Collection<String> getMaps();
+	
+	public int getMinPlayer()
+	{
+		return this.minPlayer;
+	}
+	
+	public int getMaxPlayer()
+	{
+		return this.maxPlayer;
+	}
+	
+	/**
+	 * create a custom lobby for this minigame.
+	 */
+	public Lobby createLobby()
+	{
+		Lobby lobby = new Lobby();
+		return lobby;
+	}
+	
 }

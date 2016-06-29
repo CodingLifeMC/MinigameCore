@@ -1,11 +1,15 @@
 package us.fihgu.minigamecore.matchmaking;
 
+import org.bukkit.inventory.ItemStack;
+
 public class Map
 {
 	/**
 	 * the name of the map, can be unrelated to its path.
 	 */
 	protected String name;
+	
+	protected ItemStack icon;
 	
 	/**
 	 * full path of the map, including the folder name.

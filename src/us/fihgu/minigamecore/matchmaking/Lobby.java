@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import us.fihgu.minigamecore.bungeecord.NetworkManager;
 import us.fihgu.minigamecore.mysql.DatabaseManager;
 import us.fihgu.toolbox.world.MapManager;
 
@@ -22,6 +23,7 @@ public class Lobby
 	protected HashMap<UUID, MinigamePlayer> players;
 	
 	protected GameSession currentSession = null;
+	public int id;
 	
 	public Lobby()
 	{
@@ -29,7 +31,6 @@ public class Lobby
 		this.description = "no describtion.";
 		
 		this.map = new Map("lobby", "./minigamecore/maps/lobby/");
-		this.init();
 	}
 	
 	public void startSession(GameSession session)
@@ -57,13 +58,27 @@ public class Lobby
 	public void addPlayer(MinigamePlayer player)
 	{
 		this.players.put(player.getUUID(), player);
+		//TODO: what about inspector spawn?
 		player.getOnlinePlayer().teleport(this.world.getSpawnLocation());
+		DatabaseManager.setPlayerCount(id, this.getPlayers().size());
 	}
 	
 	public void removePlayer(MinigamePlayer player)
 	{
 		this.players.remove(player.getUUID());
-		DatabaseManager.setLobby(player, "hub");
-		//TODO: teleport player to hub.
+		DatabaseManager.setLobby(player, NetworkManager.getHubServer());
+		NetworkManager.instance.sendPlayerToServer(player.getOnlinePlayer(), NetworkManager.getHubServer());
+		
+		//set playerCount in database, remove lobby if empty
+		int playerCount = this.getPlayers().size();
+		if(playerCount > 0)
+		{
+			DatabaseManager.setPlayerCount(id, playerCount);
+		}
+		else
+		{
+			MatchmakingManager.removeLocalLobby(this);
+		}
+		
 	}
 }

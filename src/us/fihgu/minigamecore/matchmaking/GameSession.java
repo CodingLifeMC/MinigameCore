@@ -28,6 +28,14 @@ public class GameSession
 	
 	protected HashMap<String, String> meta;
 	
+	public GameSession(Lobby lobby, Minigame game)
+	{
+		this.lobby = lobby;
+		this.game = game;
+		
+		this.gamePhases = this.game.createGamePhases(this);
+	}
+	
 	public void start()
 	{
 		meta = new HashMap<String, String>();

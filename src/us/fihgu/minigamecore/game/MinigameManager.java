@@ -1,8 +1,6 @@
-package us.fihgu.minigamecore;
+package us.fihgu.minigamecore.game;
 
 import java.util.HashMap;
-
-import us.fihgu.minigamecore.game.Minigame;
 
 public class MinigameManager
 {
@@ -11,5 +9,10 @@ public class MinigameManager
 	public static void registerMinigame(Minigame minigame)
 	{
 		minigames.put(minigame.getId(), minigame);
+	}
+	
+	public static Minigame getMinigame(String minigameId)
+	{
+		return minigames.get(minigameId);
 	}
 }

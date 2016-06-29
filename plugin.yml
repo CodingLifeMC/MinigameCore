@@ -3,3 +3,7 @@ name: MinigameCore
 version: 1.0
 author: fihgu
 description: Core plugin that other minigame uses.
+commands:
+ join:
+  description: join another lobby
+  usage: /join [lobbyName]
