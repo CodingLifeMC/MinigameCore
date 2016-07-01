@@ -4,6 +4,6 @@ version: 1.0
 author: fihgu
 description: Core plugin that other minigame uses.
 commands:
- join:
-  description: join another lobby
-  usage: /join [lobbyName]
+ menu:
+  description: shows the main menu.
+  usage: /menu

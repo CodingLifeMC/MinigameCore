@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.LinkedList;
+
 import org.bukkit.configuration.file.FileConfiguration;
 
 import us.fihgu.minigamecore.Loader;
@@ -62,7 +64,7 @@ public class DatabaseManager
 			}
 			
 			statement.execute("CREATE DATABASE " + DATABASE);
-			statement.execute("CREATE TABLE " + DATABASE + "." + PLAYERS_TABLE + "(uuid VARCHAR(36) PRIMARY KEY, username VARCHAR(50), lobby VARCHAR(50) DEFAULT \"offline\", money INT DEFAULT 0)");
+			statement.execute("CREATE TABLE " + DATABASE + "." + PLAYERS_TABLE + "(uuid VARCHAR(36) PRIMARY KEY, username VARCHAR(50), lobby INT DEFAULT -2, money INT DEFAULT 0)");
 			statement.execute("CREATE TABLE " + DATABASE + "." + LOBBIES_TABLE + "(id INT AUTO_INCREMENT PRIMARY KEY, minigame VARCHAR(64), playercount INT DEFAULT 0, server VARCHAR(64))");
 		}
 		catch (SQLException e)
@@ -128,7 +130,12 @@ public class DatabaseManager
 		}		
 	}
 	
-	public static String getLobby(MinigamePlayer player)
+	/**
+	 * 
+	 * @param player
+	 * @return -1 when player is in the hub, -2 when player lobby is not found.
+	 */
+	public static int getLobbyId(MinigamePlayer player)
 	{
 		try(Statement statement = getConnection().createStatement())
 		{
@@ -137,24 +144,24 @@ public class DatabaseManager
 			
 			if(resultSet.next())
 			{
-				return resultSet.getString(1);
+				return resultSet.getInt(1);
 			}
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
 		}
-		return null;
+		return -2;
 	}
 	
-	public static void setLobby(MinigamePlayer player, String lobby)
+	public static void setLobby(MinigamePlayer player, int lobbyId)
 	{
 		initPlayerData(player);
 		
 		try(Statement statement = getConnection().createStatement())
 		{
 			//UPDATE minigamecore.players SET score=50 WHERE username="fihgu";
-			statement.execute("UPDATE " + DATABASE + "." + PLAYERS_TABLE + " SET lobby=\"" + lobby + "\" WHERE uuid=\"" + player.getUUID().toString() + "\"");
+			statement.execute("UPDATE " + DATABASE + "." + PLAYERS_TABLE + " SET lobby=" + lobbyId + " WHERE uuid=\"" + player.getUUID().toString() + "\"");
 		}
 		catch (SQLException e)
 		{
@@ -332,6 +339,26 @@ public class DatabaseManager
 		}
 		
 		return server;
+	}
+	
+	public static LinkedList<Integer> getLobbyList()
+	{
+		LinkedList<Integer> list = new LinkedList<Integer>();
+		
+		try (Statement statement = getConnection().createStatement())
+		{
+			ResultSet resultSet = statement.executeQuery("SELECT id FROM " + DATABASE + "." + LOBBIES_TABLE);
+			while(resultSet.next())
+			{
+				list.add(resultSet.getInt(1));
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return list;
 	}
 	
 	/**

@@ -5,9 +5,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import us.fihgu.minigamecore.bungeecord.NetworkManager;
+import us.fihgu.minigamecore.menu.MainMenu;
 
-public class Join implements CommandExecutor
+public class Menu implements CommandExecutor
 {
 
 	@Override
@@ -17,12 +17,7 @@ public class Join implements CommandExecutor
 		{
 			Player player = (Player) sender;
 			
-			if(args.length == 1)
-			{
-				String serverName = args[0];
-				
-				NetworkManager.instance.sendPlayerToServer(player, serverName);
-			}
+			new MainMenu().show(player);
 		}
 		
 		return true;

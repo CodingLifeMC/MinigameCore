@@ -13,7 +13,10 @@ public class MinigamePlayer
 	
 	protected HashMap<String, String> meta;
 	
-	protected MinigamePlayer(Player player)
+	/**
+	 * player's meta data follows the MinigamePlayer instance, do not create two instance and expect them to have the same meta.
+	 */
+	public MinigamePlayer(Player player)
 	{
 		this.name = player.getName();
 		this.uuid = player.getUniqueId();

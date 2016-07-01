@@ -60,13 +60,14 @@ public class Lobby
 		this.players.put(player.getUUID(), player);
 		//TODO: what about inspector spawn?
 		player.getOnlinePlayer().teleport(this.world.getSpawnLocation());
+		DatabaseManager.setLobby(player, id);
 		DatabaseManager.setPlayerCount(id, this.getPlayers().size());
 	}
 	
 	public void removePlayer(MinigamePlayer player)
 	{
 		this.players.remove(player.getUUID());
-		DatabaseManager.setLobby(player, NetworkManager.getHubServer());
+		DatabaseManager.setLobby(player, -1);
 		NetworkManager.instance.sendPlayerToServer(player.getOnlinePlayer(), NetworkManager.getHubServer());
 		
 		//set playerCount in database, remove lobby if empty

@@ -4,9 +4,12 @@ import java.sql.Statement;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import us.fihgu.minigamecore.bungeecord.NetworkManager;
-import us.fihgu.minigamecore.command.Join;
+import us.fihgu.minigamecore.command.Menu;
+import us.fihgu.minigamecore.matchmaking.LoginHandler;
+import us.fihgu.minigamecore.menu.JoinLobbyMenu;
 import us.fihgu.minigamecore.mysql.DatabaseManager;
 
 public class Loader extends JavaPlugin
@@ -20,7 +23,9 @@ public class Loader extends JavaPlugin
 		this.saveDefaultConfig();
 		
 		//register commands
-		this.getCommand("join").setExecutor(new Join());
+		this.getCommand("join").setExecutor(new Menu());
+		
+		Bukkit.getPluginManager().registerEvents(new LoginHandler(), this);
 		
 		//initialize bungeecord plugin channel
 		new NetworkManager().initialize(this);
@@ -43,6 +48,17 @@ public class Loader extends JavaPlugin
 				Bukkit.getPluginManager().disablePlugin(this);
 			}
 		}
+
+		BukkitRunnable refreshMenuTask = new BukkitRunnable()
+		{
+			@Override
+			public void run()
+			{
+				JoinLobbyMenu.instance.update();
+			}
+		};
+		
+		refreshMenuTask.runTaskTimer(this, 20, 60);
 	}
 	
 	@Override

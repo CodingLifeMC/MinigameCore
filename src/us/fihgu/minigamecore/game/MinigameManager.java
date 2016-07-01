@@ -15,4 +15,9 @@ public class MinigameManager
 	{
 		return minigames.get(minigameId);
 	}
+	
+	public static HashMap<String,Minigame> getMinigames()
+	{
+		return minigames;
+	}
 }

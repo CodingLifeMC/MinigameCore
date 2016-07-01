@@ -47,6 +47,14 @@ public class NetworkManager implements PluginMessageListener
 		return Loader.instance.getConfig().getString("hubServer");
 	}
 	
+	/**
+	 * @return the name of this server
+	 */
+	public static String getServerName()
+	{
+		return Loader.instance.getConfig().getString("serverName");
+	}
+	
 	public static List<String> getLobbyServers()
 	{
 		return Loader.instance.getConfig().getStringList("lobbyServers");

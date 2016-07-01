@@ -16,6 +16,11 @@ public class MatchmakingManager
 		return id;
 	}
 	
+	public static Lobby getLocalLobby(int lobbyId)
+	{
+		return localLobbies.get(lobbyId);
+	}
+	
 	public static void removeLocalLobby(Lobby lobby)
 	{
 		localLobbies.remove(lobby.id);
