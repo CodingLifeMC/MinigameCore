@@ -3,7 +3,7 @@ mysql:
  port: 3306
  user: root
  password: 
- serverName: hub
+serverName: hub
 lobbyServers:
  - lobbyServer1
  - lobbyServer2

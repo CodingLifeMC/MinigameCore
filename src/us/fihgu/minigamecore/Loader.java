@@ -23,7 +23,7 @@ public class Loader extends JavaPlugin
 		this.saveDefaultConfig();
 		
 		//register commands
-		this.getCommand("join").setExecutor(new Menu());
+		this.getCommand("menu").setExecutor(new Menu());
 		
 		Bukkit.getPluginManager().registerEvents(new LoginHandler(), this);
 		

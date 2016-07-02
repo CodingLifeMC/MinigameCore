@@ -5,10 +5,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import net.md_5.bungee.api.ChatColor;
-import us.fihgu.minigamecore.bungeecord.NetworkManager;
 import us.fihgu.minigamecore.game.Minigame;
 import us.fihgu.minigamecore.game.MinigameManager;
-import us.fihgu.minigamecore.matchmaking.MinigamePlayer;
+import us.fihgu.minigamecore.matchmaking.MatchmakingManager;
 import us.fihgu.minigamecore.mysql.DatabaseManager;
 import us.fihgu.toolbox.ui.Button;
 import us.fihgu.toolbox.ui.ListButtonMenu;
@@ -49,11 +48,11 @@ class MinigameButton extends Button
 			if(serverName != null)
 			{
 				int lobbyId = DatabaseManager.registerNewLobby(minigame, serverName);
+				
 				if(lobbyId >= 0)
 				{
 					player.closeInventory();
-					DatabaseManager.setLobby(new MinigamePlayer(player), lobbyId);
-					NetworkManager.instance.sendPlayerToServer(player, serverName);
+					MatchmakingManager.joinLobby(lobbyId, player);
 					return;
 				}
 			}

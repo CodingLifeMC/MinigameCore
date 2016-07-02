@@ -1,15 +1,11 @@
 package us.fihgu.minigamecore.matchmaking;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.UUID;
 
-import org.bukkit.World;
-
 import us.fihgu.minigamecore.game.GamePhase;
 import us.fihgu.minigamecore.game.Minigame;
-import us.fihgu.toolbox.world.MapManager;
 
 /**
  * represents a single session of minigame. <br>
@@ -18,9 +14,6 @@ import us.fihgu.toolbox.world.MapManager;
 public class GameSession
 {
 	protected Lobby lobby;
-	
-	protected World world;
-	protected Map map;
 	
 	protected Minigame game;
 	protected LinkedList<GamePhase> gamePhases;
@@ -40,17 +33,12 @@ public class GameSession
 	{
 		meta = new HashMap<String, String>();
 		
-		//build world
-		world = MapManager.createWorld(this.getMapName(), new File(this.map.path));
-		
 		//start phase
 		this.nextPhase();
 	}
 	
 	public void onFinish()
 	{
-		MapManager.deleteWorld(this.getMapName(), this.lobby.world.getSpawnLocation());
-		
 		//clear player meta
 		for(UUID uuid : this.getPlayers().keySet())
 		{
@@ -60,11 +48,6 @@ public class GameSession
 		
 		this.meta = null;
 		this.lobby.currentSession = null;
-	}
-	
-	public String getMapName()
-	{
-		return this.lobby.name + "-" + this.map.name;
 	}
 	
 	public void nextPhase()
@@ -93,15 +76,5 @@ public class GameSession
 	public HashMap<UUID, MinigamePlayer> getPlayers()
 	{
 		return this.lobby.getPlayers();
-	}
-	
-	public World getWorld()
-	{
-		return this.world;
-	}
-	
-	public Map getMap()
-	{
-		return this.map;
 	}
 }

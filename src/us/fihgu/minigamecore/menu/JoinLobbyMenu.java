@@ -7,9 +7,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import net.md_5.bungee.api.ChatColor;
-import us.fihgu.minigamecore.bungeecord.NetworkManager;
 import us.fihgu.minigamecore.game.Minigame;
 import us.fihgu.minigamecore.game.MinigameManager;
+import us.fihgu.minigamecore.matchmaking.MatchmakingManager;
 import us.fihgu.minigamecore.matchmaking.MinigamePlayer;
 import us.fihgu.minigamecore.mysql.DatabaseManager;
 import us.fihgu.toolbox.item.ItemUtils;
@@ -59,9 +59,15 @@ class JoinLobbyButton extends Button
 		{
 			Minigame minigame = MinigameManager.getMinigame(minigameId);
 			int playerCount = DatabaseManager.getPlayerCount(lobbyId);
-			ItemStack icon = minigame.getIcon();
-			ItemUtils.setDisplayName(icon, minigame.getName());
-			ItemUtils.setLore(icon, new String[] { "Lobby ID: " + lobbyId, "Players: " + playerCount + "/" + minigame.getMaxPlayer() });
+			ItemStack icon = null;
+			
+			if(minigame != null)
+			{
+				icon = minigame.getIcon();
+				ItemUtils.setDisplayName(icon, minigame.getName());
+				ItemUtils.setLore(icon, new String[] { "Lobby ID: " + lobbyId, "Players: " + playerCount + "/" + minigame.getMaxPlayer() });
+			}
+			
 			return icon;
 		}
 
@@ -78,6 +84,7 @@ class JoinLobbyButton extends Button
 			
 			if (this.lobbyId >= 0)
 			{
+				//check minigame max player
 				String minigameId = DatabaseManager.getMinigame(lobbyId);
 				if (minigameId != null)
 				{
@@ -90,12 +97,8 @@ class JoinLobbyButton extends Button
 						return;
 					}
 				}
-				String serverName = DatabaseManager.getServer(lobbyId);
-				if(serverName != null)
-				{
-					DatabaseManager.setLobby(player, lobbyId);
-					NetworkManager.instance.sendPlayerToServer(player.getOnlinePlayer(), serverName);
-				}
+				
+				MatchmakingManager.joinLobby(lobbyId, player.getOnlinePlayer());			
 			}
 		}
 	}

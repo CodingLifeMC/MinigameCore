@@ -11,7 +11,7 @@ import us.fihgu.minigamecore.matchmaking.GameSession;
 
 public abstract class GamePhase
 {
-	GameSession session;
+	protected GameSession session;
 	
 	public GamePhase(GameSession session)
 	{

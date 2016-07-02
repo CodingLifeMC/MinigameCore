@@ -1,6 +1,5 @@
 package us.fihgu.minigamecore.game;
 
-import java.util.Collection;
 import java.util.LinkedList;
 
 import org.bukkit.Material;
@@ -32,6 +31,13 @@ public abstract class Minigame
 	
 	protected ItemStack icon;
 	
+	public Minigame(String id, String name, String description)
+	{
+		this.id = id;
+		this.name = name;
+		this.description = description;
+	}
+	
 	public String getId()
 	{
 		return this.id;
@@ -41,11 +47,6 @@ public abstract class Minigame
 	 * creates a list of fresh new game phases.
 	 */
 	public abstract LinkedList<GamePhase> createGamePhases(GameSession session);
-	
-	/**
-	 * @return the possible maps for this minigame.<br>
-	 */
-	public abstract Collection<String> getMaps();
 	
 	public int getMinPlayer()
 	{
@@ -60,9 +61,13 @@ public abstract class Minigame
 	/**
 	 * create a custom lobby for this minigame.
 	 */
-	public Lobby createLobby()
+	public Lobby createLobby(int lobbyId)
 	{
-		Lobby lobby = new Lobby();
+		Lobby lobby = new Lobby(lobbyId);
+		
+		lobby.setName(this.getName() + "-" + this.getId());
+		lobby.setDescription(this.description);
+		
 		return lobby;
 	}
 	
