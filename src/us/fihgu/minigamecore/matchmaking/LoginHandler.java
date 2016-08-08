@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import us.fihgu.minigamecore.Loader;
@@ -32,5 +33,19 @@ public class LoginHandler implements Listener
 		task.runTaskLater(Loader.instance, 20);
 	}
 	
-	
+	@EventHandler
+	public void onDisconnect(PlayerQuitEvent event)
+	{
+		MinigamePlayer player = new MinigamePlayer(event.getPlayer());
+		int playerLobby = DatabaseManager.getLobbyId(player);
+		if(playerLobby > 0)
+		{
+			Lobby lobby = MatchmakingManager.getLocalLobby(playerLobby);
+			if(lobby != null)
+			{
+				lobby.removePlayer(lobby.getPlayers().get(player.getUUID()));
+			}
+		}
+		
+	}
 }

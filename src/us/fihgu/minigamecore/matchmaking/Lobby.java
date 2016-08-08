@@ -68,7 +68,10 @@ public class Lobby
 	public void removePlayer(MinigamePlayer player)
 	{
 		unregisterPlayer(player);
-		NetworkManager.instance.sendPlayerToServer(player.getOnlinePlayer(), NetworkManager.getHubServer());
+		if(player.getOnlinePlayer() != null)
+		{
+			NetworkManager.instance.sendPlayerToServer(player.getOnlinePlayer(), NetworkManager.getHubServer());
+		}
 	}
 	
 	/**

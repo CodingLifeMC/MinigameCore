@@ -46,13 +46,16 @@ public class MatchmakingManager
 		
 		//exist old lobby if player is in it.
 		int oldLobbyId = DatabaseManager.getLobbyId(minigamePlayer);
-		Lobby oldLocalLobby = MatchmakingManager.getLocalLobby(oldLobbyId);
-		if(oldLocalLobby != null)
+		if(oldLobbyId != lobbyId)
 		{
-			MinigamePlayer oldPlayer = oldLocalLobby.getPlayers().get(player.getUniqueId());
-			if(oldPlayer != null)
+			Lobby oldLocalLobby = MatchmakingManager.getLocalLobby(oldLobbyId);
+			if(oldLocalLobby != null)
 			{
-				oldLocalLobby.unregisterPlayer(oldPlayer);
+				MinigamePlayer oldPlayer = oldLocalLobby.getPlayers().get(player.getUniqueId());
+				if(oldPlayer != null)
+				{
+					oldLocalLobby.unregisterPlayer(oldPlayer);
+				}
 			}
 		}
 		
@@ -130,6 +133,7 @@ public class MatchmakingManager
 		if(!localServer.equals(serverName))
 		{
 			System.err.println("Local lobby (id=" + lobbyId + ") was not registered, can not create local lobby.");
+			DatabaseManager.setLobby(new MinigamePlayer(player), -1);
 			return;
 		}
 		

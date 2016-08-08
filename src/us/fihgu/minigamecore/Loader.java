@@ -25,6 +25,7 @@ public class Loader extends JavaPlugin
 		//register commands
 		this.getCommand("menu").setExecutor(new Menu());
 		
+		//register events
 		Bukkit.getPluginManager().registerEvents(new LoginHandler(), this);
 		
 		//initialize bungeecord plugin channel
