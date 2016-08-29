@@ -27,6 +27,7 @@ public class LoginHandler implements Listener
 			{
 				int playerLobby = DatabaseManager.getLobbyId(new MinigamePlayer(player));
 				
+				
 				MatchmakingManager.joinLobby(playerLobby, player);
 			}
 		};
